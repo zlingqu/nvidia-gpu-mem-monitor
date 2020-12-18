@@ -1,4 +1,4 @@
-module nvidia-gpu-mem-monitor
+module github.com/zlingqu/nvidia-gpu-mem-monitor
 
 go 1.15
 
