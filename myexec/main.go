@@ -1,4 +1,4 @@
-package github.com/zlingqu/nvidia-gpu-mem-monitor/myexec
+package myexec
 
 import (
 	"bytes"
