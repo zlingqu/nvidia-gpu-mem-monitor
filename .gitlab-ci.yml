@@ -1,0 +1,43 @@
+variables:
+    DOCKER_REGIS_URL: "docker.dm-ai.cn" #docker仓库地址
+    PROJECT_NAME: devops #项目代号，也是k8s的namespace的名字
+    SERVER_NAME: nvidia-gpu-mem-monitor #服务名
+    IMAGE_TAG_NAME: "${DOCKER_REGIS_URL}/${PROJECT_NAME}/${SERVER_NAME}:${CI_COMMIT_SHA}"  #使用代码的commitid作为image的tag
+    # IMAGE_TAG_NAME: "${DOCKER_REGIS_URL}/${PROJECT_NAME}/${SERVER_NAME}:${CI_RUNNER_TAGS}" #使用代码的tag名字作为image的tag
+  
+stages:
+  - build
+  - make_and_push_image
+  - k8s_dev_deploy
+  - k8s_prd_deploy
+    
+job_make_and_push_image:
+  image: 
+    name: docker.dm-ai.cn/public/kaniko-executor:debug-v1.3.0
+    entrypoint: [""]
+  stage: make_and_push_image
+  script:
+    - echo "{\"auths\":{\"$DOCKER_REGIS_URL\":{\"username\":\"$DOCKER_LIB_USER\",\"password\":\"$DOCKER_LIB_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - cat $CI_PROJECT_DIR/Dockerfile && echo ""
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $IMAGE_TAG_NAME #使用kaniko代替dind/sokcet模式，打镜像和上传
+    - echo "docker image is:" && echo $IMAGE_TAG_NAME
+  only:
+    - dev
+  tags:
+    - k8s-runner
+  
+job_k8s_dev_deploy:
+  image: 
+    name: docker.dm-ai.cn/public/alpine:kubectl-1.18.10
+  stage: k8s_dev_deploy
+  script:
+    - echo $K8S_DEV_TOKEN|base64 -d > ~/.kube/config
+    - cd $CI_PROJECT_DIR
+    - ls -l && pwd
+    - sed -i "s#IMAGE_TAG_NAME#${IMAGE_TAG_NAME}#g" k8s-deploy.yml
+    - cat k8s-deploy.yml
+    - kubectl apply -f k8s-deploy.yml
+  only:
+    - dev
+  tags:
+    - k8s-runner
