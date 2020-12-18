@@ -1,4 +1,4 @@
-package dockercli
+package github.com/zlingqu/nvidia-gpu-mem-monitor/dockercli
 
 import (
 	"context"
