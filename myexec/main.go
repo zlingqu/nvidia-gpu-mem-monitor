@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
-	"io/ioutil"
 	"os/exec"
 )
 
@@ -25,31 +24,12 @@ func GetExecOutByCSV(argu string) [][]string {
 func GetExecOutByString(argu string) string {
 
 	cmd := exec.Command("/bin/bash", "-c", argu)
-
-	//创建获取命令输出管道
-	stdout, err := cmd.StdoutPipe()
+	output, err := cmd.Output()
 	if err != nil {
-		fmt.Printf("Error:can not obtain stdout pipe for command:%s\n", err)
-		return "error"
+		fmt.Printf("Execute Shell:%s failed with error:%s", cmd, err.Error())
+		return ""
 	}
 
-	//执行命令
-	if err := cmd.Start(); err != nil {
-		fmt.Println("Error:The command is err,", err)
-		return "error"
-	}
+	return string(output)
 
-	//读取所有输出
-	bytes, err := ioutil.ReadAll(stdout)
-	if err != nil {
-		fmt.Println("ReadAll Stdout:", err.Error())
-		return "error"
-	}
-
-	if err := cmd.Wait(); err != nil {
-		fmt.Println("wait:", err.Error())
-		return "error"
-	}
-	// fmt.Printf("stdout:\n\n %s", bytes)
-	return string(bytes[0 : len(bytes)-1])
 }
