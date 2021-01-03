@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+
 	"github.com/zlingqu/nvidia-gpu-mem-monitor/dockercli"
 	"github.com/zlingqu/nvidia-gpu-mem-monitor/myexec"
 
@@ -25,6 +26,7 @@ func main() {
 func httpGetRespon() string {
 
 	cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.37", nil, nil) //使用socket通信
+	defer cli.Close()                                                              //记得释放
 	if err != nil {
 		panic(err)
 	}
