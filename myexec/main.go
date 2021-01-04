@@ -40,7 +40,7 @@ func GetExecOutByString(argu string) string {
 	}
 
 	//读取所有输出
-	bytes, err := ioutil.ReadAll(stdout)
+	myByte, err := ioutil.ReadAll(stdout)
 	if err != nil {
 		fmt.Println("ReadAll Stdout:", err.Error())
 		return "error"
@@ -51,5 +51,5 @@ func GetExecOutByString(argu string) string {
 		return "error"
 	}
 	// fmt.Printf("stdout:\n\n %s", bytes)
-	return string(bytes[0 : len(bytes)-1])
+	return string(myByte[0 : len(myByte)-1])
 }
