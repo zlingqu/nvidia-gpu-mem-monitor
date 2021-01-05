@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"fmt"
+	"net"
+	"os"
+
 	"github.com/docker/docker/client"
 	svc "github.com/zlingqu/nvidia-gpu-mem-monitor/service"
-	"net"
 )
 
 func Metrics() string {
@@ -17,7 +19,7 @@ func Metrics() string {
 
 	records := svc.GetExecOutByCSV("nvidia-smi --query-compute-apps=pid,used_gpu_memory,gpu_name,gpu_uuid --format=csv,noheader,nounits")
 
-	var respon string = `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
+	var response string = `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
 # TYPE pod_used_gpu_mem_MB gauge
 `
 
@@ -28,13 +30,16 @@ func Metrics() string {
 		if containID != "" {
 			podName, podNamespace = svc.GetContainsPodInfo(cli, containID) //获取pod信息
 		}
-		respon = fmt.Sprintf("%spod_used_gpu_mem_MB{instance=\"%s\",app_pid=\"%s\",gpu_name=\"%s\",gpu_uuid=\"%s\",pod_name=\"%s\",pod_namespace=\"%s\"} %s\n",
-			respon, getIP(), row[0], row[2], row[3], podName, podNamespace, row[1])
+		response = fmt.Sprintf("%spod_used_gpu_mem_MB{instance=\"%s\",app_pid=\"%s\",gpu_name=\"%s\",gpu_uuid=\"%s\",pod_name=\"%s\",pod_namespace=\"%s\"} %s\n",
+			response, getIP(), row[0], row[2], row[3], podName, podNamespace, row[1])
 	}
-	return respon
+	return response
 }
 
 func getIP() string {
+	if hostIP := os.Getenv("hostIP"); hostIP != "" { //如果部署到k8s中会注入hostIP变量
+		return hostIP
+	}
 	netInterfaces, err := net.Interfaces()
 	if err != nil {
 		fmt.Println("net.Interfaces failed, err:", err.Error())

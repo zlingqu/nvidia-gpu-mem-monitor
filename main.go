@@ -1,9 +1,10 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/zlingqu/nvidia-gpu-mem-monitor/handlers"
-	"net/http"
 )
 
 func main() {
