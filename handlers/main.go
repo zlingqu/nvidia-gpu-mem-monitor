@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
 
@@ -9,17 +10,24 @@ import (
 	svc "github.com/zlingqu/nvidia-gpu-mem-monitor/service"
 )
 
+// Metrics 提供metrics接口
 func Metrics() string {
 
-	cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.37", nil, nil) //使用socket通信
-	defer cli.Close()                                                              //记得释放
+	cli, err := client.NewClientWithOpts(client.WithHost("unix:///var/run/docker.sock"), client.WithVersion("v1.39")) //使用socket通信
+
 	if err != nil {
-		panic(err)
+		log.Print("docker client 初始化错误" + err.Error())
+		return ""
 	}
 
-	records := svc.GetExecOutByCSV("nvidia-smi --query-compute-apps=pid,used_gpu_memory,gpu_name,gpu_uuid --format=csv,noheader,nounits")
+	if cli == nil {
+		log.Print("docker client 初始化错误")
+		return ""
+	}
+	//defer cli.Close() //记得释放
 
-	var response string = `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
+	records := svc.GetExecOutByCSV("nvidia-smi --query-compute-apps=pid,used_gpu_memory,gpu_name,gpu_uuid --format=csv,noheader,nounits")
+	response := `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
 # TYPE pod_used_gpu_mem_MB gauge
 `
 
