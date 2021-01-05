@@ -1,4 +1,4 @@
-package dockercli
+package service
 
 import (
 	"context"

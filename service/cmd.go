@@ -1,4 +1,4 @@
-package myexec
+package service
 
 import (
 	"bytes"
