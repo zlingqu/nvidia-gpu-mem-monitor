@@ -24,7 +24,7 @@ func Metrics() string {
 		log.Print("docker client 初始化错误")
 		return ""
 	}
-	//defer cli.Close() //记得释放
+	defer cli.Close() //记得释放
 
 	records := svc.GetExecOutByCSV("nvidia-smi --query-compute-apps=pid,used_gpu_memory,gpu_name,gpu_uuid --format=csv,noheader,nounits")
 	response := `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
