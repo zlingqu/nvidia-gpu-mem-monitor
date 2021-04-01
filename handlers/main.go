@@ -42,7 +42,7 @@ func Metrics() string {
 				podNamespace = "null"
 			}
 		}
-		response = fmt.Sprintf("%spod_used_gpu_mem_MB{hostIP=\"%s\",app_pid=\"%s\",gpu_name=\"%s\",gpu_uuid=\"%s\",pod_name=\"%s\",pod_namespace=\"%s\"} %s\n",
+		response = fmt.Sprintf("%spod_used_gpu_mem_MB{hostIP=\"%s\",app_pid=\"%s\",gpu_name=\"%s\",gpu_uuid=\"%s\",pod=\"%s\",namespace=\"%s\"} %s\n",
 			response, getIP(), row[0], row[2], row[3], podName, podNamespace, row[1])
 	}
 	return response
