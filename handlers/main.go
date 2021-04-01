@@ -34,9 +34,13 @@ func Metrics() string {
 	for _, row := range records {
 		cmd := "cat /proc/" + row[0] + "/cgroup |head -1 | awk -F'/' '{print $NF}'"
 		containID := svc.GetExecOutByString(cmd)
-		podName, podNamespace := "null", "null" //非pod使用gpu的进程
+		podName, podNamespace := "服务器直接运行的程序", "null" //非pod使用gpu的进程
 		if containID != "" {
 			podName, podNamespace = svc.GetContainsPodInfo(cli, containID) //获取pod信息
+			if podName == "" || podNamespace == "" {                       //排除docker run起来的进程
+				podName = "docker run运行的程序"
+				podNamespace = "null"
+			}
 		}
 		response = fmt.Sprintf("%spod_used_gpu_mem_MB{hostIP=\"%s\",app_pid=\"%s\",gpu_name=\"%s\",gpu_uuid=\"%s\",pod_name=\"%s\",pod_namespace=\"%s\"} %s\n",
 			response, getIP(), row[0], row[2], row[3], podName, podNamespace, row[1])
