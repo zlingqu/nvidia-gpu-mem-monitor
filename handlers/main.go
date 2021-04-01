@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
 
@@ -9,28 +10,39 @@ import (
 	svc "github.com/zlingqu/nvidia-gpu-mem-monitor/service"
 )
 
+// Metrics 提供metrics接口
 func Metrics() string {
 
-	cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.37", nil, nil) //使用socket通信
-	defer cli.Close()                                                              //记得释放
+	cli, err := client.NewClientWithOpts(client.WithHost("unix:///var/run/docker.sock"), client.WithVersion("v1.38")) //使用socket通信
+
 	if err != nil {
-		panic(err)
+		log.Print("docker client 初始化错误" + err.Error())
+		return ""
 	}
 
-	records := svc.GetExecOutByCSV("nvidia-smi --query-compute-apps=pid,used_gpu_memory,gpu_name,gpu_uuid --format=csv,noheader,nounits")
+	if cli == nil {
+		log.Print("docker client 初始化错误")
+		return ""
+	}
+	defer cli.Close() //记得释放
 
-	var response string = `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
+	records := svc.GetExecOutByCSV("nvidia-smi --query-compute-apps=pid,used_gpu_memory,gpu_name,gpu_uuid --format=csv,noheader,nounits")
+	response := `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
 # TYPE pod_used_gpu_mem_MB gauge
 `
 
 	for _, row := range records {
-		cmd := "cat /proc/" + row[0] + "/cgroup |head -1 | awk -F'/' '{print $5}'"
+		cmd := "cat /proc/" + row[0] + "/cgroup |head -1 | awk -F'/' '{print $NF}'"
 		containID := svc.GetExecOutByString(cmd)
-		podName, podNamespace := "null", "null" //非pod使用gpu的进程
+		podName, podNamespace := "服务器直接运行的程序", "null" //非pod使用gpu的进程
 		if containID != "" {
 			podName, podNamespace = svc.GetContainsPodInfo(cli, containID) //获取pod信息
+			if podName == "" || podNamespace == "" {                       //排除docker run起来的进程
+				podName = "docker run运行的程序"
+				podNamespace = "null"
+			}
 		}
-		response = fmt.Sprintf("%spod_used_gpu_mem_MB{instance=\"%s\",app_pid=\"%s\",gpu_name=\"%s\",gpu_uuid=\"%s\",pod_name=\"%s\",pod_namespace=\"%s\"} %s\n",
+		response = fmt.Sprintf("%spod_used_gpu_mem_MB{hostIP=\"%s\",app_pid=\"%s\",gpu_name=\"%s\",gpu_uuid=\"%s\",pod_name=\"%s\",pod_namespace=\"%s\"} %s\n",
 			response, getIP(), row[0], row[2], row[3], podName, podNamespace, row[1])
 	}
 	return response
@@ -67,7 +79,7 @@ func interFaceFields(myInterFace net.Interface) bool {
 	if myInterFace.MTU != 1500 {
 		return false
 	}
-	if len(myInterFace.HardwareAddr) > 17 { //排查ib网络的网卡
+	if len(myInterFace.HardwareAddr) > 17 { //排除ib网络的网卡
 		return false
 	}
 	for _, v := range []string{"cni0", "flannel.1", "docker0", "virbr0"} { //排除特殊的网卡设备

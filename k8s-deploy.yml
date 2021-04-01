@@ -8,13 +8,13 @@ metadata:
     app: nvidia-gpu-mem-monitor
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "80"
+    prometheus.io/port: "59500"
 spec:
   type: ClusterIP
   ports:
   - port: 80
     name: nvidia-gpu-mem-monitor
-    targetPort: 80
+    targetPort: 59500
   selector:
     app: nvidia-gpu-mem-monitor
 ---
@@ -39,16 +39,14 @@ spec:
            requiredDuringSchedulingIgnoredDuringExecution:
              nodeSelectorTerms:
              - matchExpressions:
-               - key: gpu
+               - key: gpu.card.type
+                 operator: Exists
+             - matchExpressions:
+               - key: gpu.mem.type
                  operator: Exists
              - matchExpressions:
                - key: gpushare
                  operator: Exists
-             - matchExpressions:
-               - key: daipops
-                 operator: In
-                 values:
-                 - gpushare
        tolerations:
        - operator: Exists
          effect: NoSchedule
@@ -56,7 +54,7 @@ spec:
        - name: nvidia-gpu-mem-monitor
          image: IMAGE_TAG_NAME
          ports:
-         - containerPort: 80
+         - containerPort: 59500
          env:
          - name: TZ
            value: Asia/Shanghai

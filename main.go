@@ -15,6 +15,6 @@ func main() {
 		r := handlers.Metrics()
 		c.String(http.StatusOK, r)
 	})
-	r.Run(":80")
+	r.Run(":59500")
 
 }
