@@ -39,7 +39,7 @@ spec:
            requiredDuringSchedulingIgnoredDuringExecution:
              nodeSelectorTerms:
              - matchExpressions:
-               - key: gpu.type.type
+               - key: gpu.card.type
                  operator: Exists
              - matchExpressions:
                - key: gpu.mem.type
