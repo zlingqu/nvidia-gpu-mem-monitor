@@ -32,7 +32,7 @@ func Metrics() string {
 `
 
 	for _, row := range records {
-		cmd := "cat /proc/" + row[0] + "/cgroup |head -1 | awk -F'/' '{print $5}'"
+		cmd := "cat /proc/" + row[0] + "/cgroup |head -1 | awk -F'/' '{print $NF}'"
 		containID := svc.GetExecOutByString(cmd)
 		podName, podNamespace := "null", "null" //非pod使用gpu的进程
 		if containID != "" {
