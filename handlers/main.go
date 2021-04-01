@@ -75,7 +75,7 @@ func interFaceFields(myInterFace net.Interface) bool {
 	if myInterFace.MTU != 1500 {
 		return false
 	}
-	if len(myInterFace.HardwareAddr) > 17 { //排查ib网络的网卡
+	if len(myInterFace.HardwareAddr) > 17 { //排除ib网络的网卡
 		return false
 	}
 	for _, v := range []string{"cni0", "flannel.1", "docker0", "virbr0"} { //排除特殊的网卡设备
