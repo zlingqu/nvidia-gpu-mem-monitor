@@ -13,7 +13,7 @@ import (
 // Metrics 提供metrics接口
 func Metrics() string {
 
-	cli, err := client.NewClientWithOpts(client.WithHost("unix:///var/run/docker.sock"), client.WithVersion("v1.39")) //使用socket通信
+	cli, err := client.NewClientWithOpts(client.WithHost("unix:///var/run/docker.sock"), client.WithVersion("v1.38")) //使用socket通信
 
 	if err != nil {
 		log.Print("docker client 初始化错误" + err.Error())
