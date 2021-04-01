@@ -2,7 +2,7 @@ variables:
     DOCKER_REGIS_URL: "docker.dm-ai.cn" #docker仓库地址
     PROJECT_NAME: devops #项目代号，也是k8s的namespace的名字
     SERVER_NAME: nvidia-gpu-mem-monitor #服务名
-    IMAGE_TAG_NAME: "${DOCKER_REGIS_URL}/${PROJECT_NAME}/${SERVER_NAME}:${CI_COMMIT_SHA}"  #使用代码的commitid作为image的tag
+    IMAGE_TAG_NAME: "${DOCKER_REGISTRY_URL}/${PROJECT_NAME}/${SERVER_NAME}:${CI_COMMIT_SHA}"  #使用代码的commitid作为image的tag
     # IMAGE_TAG_NAME: "${DOCKER_REGIS_URL}/${PROJECT_NAME}/${SERVER_NAME}:${CI_RUNNER_TAGS}" #使用代码的tag名字作为image的tag
   
 stages:
@@ -17,7 +17,7 @@ job_make_and_push_image:
     entrypoint: [""]
   stage: make_and_push_image
   script:
-    - echo "{\"auths\":{\"$DOCKER_REGIS_URL\":{\"username\":\"$DOCKER_LIB_USER\",\"password\":\"$DOCKER_LIB_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"$DOCKER_REGISTRY_URL\":{\"username\":\"$DOCKER_REGISTRY_USERNAME\",\"password\":\"$DOCKER_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - cat $CI_PROJECT_DIR/Dockerfile && echo ""
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $IMAGE_TAG_NAME #使用kaniko代替dind/sokcet模式，打镜像和上传
     - echo "docker image is:" && echo $IMAGE_TAG_NAME
