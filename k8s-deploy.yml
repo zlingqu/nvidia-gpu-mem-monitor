@@ -39,16 +39,14 @@ spec:
            requiredDuringSchedulingIgnoredDuringExecution:
              nodeSelectorTerms:
              - matchExpressions:
-               - key: gpu
+               - key: gpu.type.type
+                 operator: Exists
+             - matchExpressions:
+               - key: gpu.mem.type
                  operator: Exists
              - matchExpressions:
                - key: gpushare
                  operator: Exists
-             - matchExpressions:
-               - key: daipops
-                 operator: In
-                 values:
-                 - gpushare
        tolerations:
        - operator: Exists
          effect: NoSchedule
