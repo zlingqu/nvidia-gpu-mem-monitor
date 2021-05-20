@@ -39,8 +39,8 @@ func Metrics() string {
 		GPU-55da7249-18e7-c3e7-beb8-4e1f661f5461, 3
 	*/
 	response := `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
-	# TYPE pod_used_gpu_mem_MB gauge
-	`
+# TYPE pod_used_gpu_mem_MB gauge
+`
 	gpu := ""
 	for _, row := range records {
 		cmd := "cat /proc/" + row[0] + "/cgroup |head -1 | awk -F'/' '{print $NF}'"
