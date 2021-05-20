@@ -31,12 +31,12 @@ func Metrics() string {
 		31756, 1267, GeForce GTX 1080 Ti, GPU-78d64296-8254-ef39-35ec-cb35bd6e6192
 		25580, 753, GeForce GTX 1080 Ti, GPU-78d64296-8254-ef39-35ec-cb35bd6e6192
 	*/
-	gpuLists := svc.GetExecOutByCSV("nvidia-smi -L|awk '{print $8,$2}'|sed 's/)/,/g'|sed 's/://g'")
+	gpuLists := svc.GetExecOutByCSV("nvidia-smi -L|awk '{print $NF,$2}'|sed 's/)/,/g'|sed 's/://g'")
 	/*
-	GPU-78d64296-8254-ef39-35ec-cb35bd6e6192, 0
-	GPU-2b8215f8-eb7c-0ae4-328f-a678a84f8d08, 1
-	GPU-9d5d5439-4397-7189-1a46-801b59248301, 2
-	GPU-55da7249-18e7-c3e7-beb8-4e1f661f5461, 3
+		GPU-78d64296-8254-ef39-35ec-cb35bd6e6192, 0
+		GPU-2b8215f8-eb7c-0ae4-328f-a678a84f8d08, 1
+		GPU-9d5d5439-4397-7189-1a46-801b59248301, 2
+		GPU-55da7249-18e7-c3e7-beb8-4e1f661f5461, 3
 	*/
 	response := `# HELP pod_used_gpu_mem_MB . Pod使用的GPU显存大小
 	# TYPE pod_used_gpu_mem_MB gauge
