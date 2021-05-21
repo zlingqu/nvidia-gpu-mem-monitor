@@ -44,12 +44,11 @@ spec:
              - matchExpressions:
                - key: gpu.mem.type
                  operator: Exists
-             - matchExpressions:
-               - key: gpushare
-                 operator: Exists
        tolerations:
        - operator: Exists
          effect: NoSchedule
+       imagePullSecrets:
+       - name: regsecret
        containers:
        - name: nvidia-gpu-mem-monitor
          image: IMAGE_TAG_NAME
